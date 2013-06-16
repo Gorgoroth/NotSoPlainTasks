@@ -8,6 +8,10 @@ if exists("b:did_ftplugin")
   finish
 endif
 
+if has('autocmd')
+  autocmd BufWritePost * call SearchForTodos()
+endif
+
 nnoremap <buffer> + :call NewTask()<cr>A
 nnoremap <buffer> = :call ToggleComplete()<cr>
 nnoremap <buffer> <C-M> :call ToggleCancel()<cr>
@@ -155,7 +159,3 @@ function! SearchForTodos()
   endw
   call SaveTodo(lines)
 endfunction
-if has('autocmd')
-  autocmd BufWritePre * call SearchForTodos()
-endif
-
