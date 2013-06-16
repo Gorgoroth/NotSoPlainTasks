@@ -1,6 +1,5 @@
-General:
-☐ In Insertmode, if in task and CR is pressed, start new task
-☐ In todofile, if task is toggle, remove from source code
-☐ Add option to blacklist files
-☐ If comment is deleted in source code file, toggle task as done in project.todo
-☐ In todofile, link gf to file and line number of task
+FILE plugin/plaintasks.vim:
+☐ 36: Why doesn't this work?
+☐ 52: .*\C')
+☐ 54: ')[0]
+

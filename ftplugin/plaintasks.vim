@@ -8,6 +8,7 @@ if exists("b:did_ftplugin")
   finish
 endif
 
+" TODO think of better keyboard shortcuts
 nnoremap <buffer> + :call NewTask()<cr>A
 nnoremap <buffer> = :call ToggleComplete()<cr>
 nnoremap <buffer> <C-M> :call ToggleCancel()<cr>
@@ -15,6 +16,7 @@ nnoremap <buffer> - :call ArchiveTasks()<cr>
 abbr -- <c-r>=Separator()<cr>
 
 " when pressing enter within a task it creates another task
+" TODO checkout why this doesnt work
 setlocal comments+=n:☐
 
 function! ToggleComplete()

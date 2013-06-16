@@ -13,16 +13,16 @@ function! SaveTodo(lines)
     let todo_file = readfile(todo_filename)
   endif
 
-  " TODO how does this work when file is not yet present
-  " TODO adding a test
-
   " Get region for current filename
   let start = match(todo_file, 'FILE '.filename.':')
   if(start != -1)
     " If there is already an entry, check for existing
     let finish = match(todo_file, 'FILE .*', start+1)
 
-    " TODO check if this is working
+    if(finish == -1)
+      finish = length(todo_file)
+    endif
+
     let rm_counter = 0
     while rm_counter <= finish-start
       let file_todo = get(todo_file, rm_counter+start)
@@ -33,8 +33,8 @@ function! SaveTodo(lines)
     call extend(todo_file, a:lines, finish-rm_counter-1)
   else
     " Insert new bock at end of file
-    " TODO check if this works
-    call insert(a:lines, 'FILE '.bufname("%").':', 0)
+    " TODO Why doesn't this work?
+    call insert(a:lines, 'FILE '.filename.':', 0)
     call add(a:lines, '')
     call extend(todo_file, a:lines)
   endif
@@ -45,7 +45,6 @@ endfunction
 " filename.ext: and then list all todos
 function! SearchForTodos()
   " First look for todos in current buffer
-  " TODO not for todo file types
   let lines = []
   let i = 0
   while i <= line('$')
