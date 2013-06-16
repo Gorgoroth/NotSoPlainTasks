@@ -20,7 +20,7 @@ function! SaveTodo(lines)
     let finish = match(todo_file, 'FILE .*', start+1)
 
     if(finish == -1)
-      finish = length(todo_file)
+      finish = len(todo_file)
     endif
 
     let rm_counter = 0
