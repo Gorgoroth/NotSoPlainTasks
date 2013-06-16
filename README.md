@@ -1,23 +1,27 @@
-PlainTasks.vim
-==============
+# NotSoPlainTasks
+This VIM extension is intended to keep the TODOs in your source code organized without disrupting your workflow.
 
-This plugin is an implementation of the PlainTasks format
-(see https://github.com/aziz/PlainTasks) for Vim
+## Installation
+### Vundle
+Add this to your .vimrc
 
-to install with Vundle just add the following line your .vimrc and run ":BundleInstall"
+    Bundle 'Gorgoroth/NotSoPlainTasks'
 
-```
-Bundle 'elentok/plaintasks.vim'
-```
+## Usage
+NotSoPlainTasks does not disrupt your workflow, simply add and remove your TODOs in your source code as you always would.
 
-Keyboard Shortcuts
-------------------
+### In your source code
+Just work as normal, if there's a todo, just do this
 
-```
-+ - create new task
-= - toggle complete
-<C-M> - toggle cancel
-- - archive tasks
---<space> - insert a separator line
+    // TODO explain do_stuff function better
 
-```
+then save with :w, your task with be added to project.todo in your working dir. All tasks are grouped by source code filenames. If you remove the comment again and save, the task is toggled as done in the project.todo.
+
+### In the project.todo
+In your \*.todo-files, you can use the following keys in normal mode:
+
+    + - create new task
+    = - toggle complete
+    <C-M> - toggle cancel
+    - - archive tasks
+    --<space> - insert a separator line

@@ -1,5 +1,6 @@
-FILE /home/vk/.vimrc:
-☐ 36: find out what that setting does
-☐ 81: document the awesomeness of this
-☐ 193: files into todo lists
-
+General:
+☐ In Insertmode, if in task and CR is pressed, start new task
+☐ In todofile, if task is toggle, remove from source code
+☐ Add option to blacklist files
+☐ If comment is deleted in source code file, toggle task as done in project.todo
+☐ In todofile, link gf to file and line number of task
