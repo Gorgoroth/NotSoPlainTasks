@@ -8,9 +8,9 @@ if exists("b:did_ftplugin")
   finish
 endif
 
-if has('autocmd')
+augroup NotSoPlainTasks
   autocmd BufWritePost * call SearchForTodos()
-endif
+augroup END
 
 nnoremap <buffer> + :call NewTask()<cr>A
 nnoremap <buffer> = :call ToggleComplete()<cr>
