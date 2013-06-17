@@ -1,5 +1,9 @@
 FILE plugin/plaintasks.vim:
-☐ 36: Why doesn't this work?
-☐ 52: .*\C')
-☐ 54: ')[0]
+☐ 40: Why doesn't this work?
+☐ 56: .*\C')
+☐ 58: ')[0]
+
+FILE ftplugin/plaintasks.vim:
+☐ 11: think of better keyboard shortcuts
+☐ 19: checkout why this doesnt work
 

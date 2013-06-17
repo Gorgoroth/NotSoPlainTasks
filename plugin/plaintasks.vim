@@ -8,8 +8,9 @@ function! SaveTodo(lines)
   let todo_filename = getcwd().'/project.todo'
   let todo_file = []
 
+  " If project todo file already exists, read it
   let file_exists = findfile(todo_filename)
-  if(file_exists != 0)
+  if(file_exists != '')
     let todo_file = readfile(todo_filename)
   endif
 
@@ -20,7 +21,7 @@ function! SaveTodo(lines)
     let finish = match(todo_file, 'FILE .*', start+1)
 
     if(finish == -1)
-      finish = len(todo_file)
+      let finish = len(todo_file)
     endif
 
     let rm_counter = 0
@@ -33,7 +34,6 @@ function! SaveTodo(lines)
     call extend(todo_file, a:lines, finish-rm_counter-1)
   else
     " Insert new bock at end of file
-    " TODO Why doesn't this work?
     call insert(a:lines, 'FILE '.filename.':', 0)
     call add(a:lines, '')
     call extend(todo_file, a:lines)
@@ -57,5 +57,6 @@ function! SearchForTodos()
     endif
     let i += 1
   endw
+  " Handle todos for current buffer
   call SaveTodo(lines)
 endfunction
