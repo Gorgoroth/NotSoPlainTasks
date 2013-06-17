@@ -1,9 +1,19 @@
-FILE plugin/plaintasks.vim:
-☐ 40: Why doesn't this work?
-☐ 56: .*\C')
-☐ 58: ')[0]
+GENERAL:
+This is a test, pleas let this not be removed
 
-FILE ftplugin/plaintasks.vim:
-☐ 11: think of better keyboard shortcuts
-☐ 19: checkout why this doesnt work
+FILE plugin/plaintasks.vim:
+☐ 27: figure out how to distinguish between completed and changed todos
+☐ 100: Fourth remove all comments with no matches
+☐ 146: don't do this for todo list specific files, e.g. *.todo
+☐ 153: .*\C')
+☐ 155: ')[0]
+☐ 157: ')[0]
+☐ 157: ')[0]
+☐ 156: ')[0]
+☐ 157: ')[0]
+☐ 157: ')[0]
+☐ 157: ')[0]
+☐ 165: there is something up with the last comment
+☐ 155: ')[0]
+☐ 155: ')[0]
 
