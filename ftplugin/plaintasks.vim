@@ -2,6 +2,10 @@
 " Language: PlainTasks
 " Maintainer: David Elentok
 " ArchiveTasks() added by Nik van der Ploeg
+" TODO update file header
+" TODO but keep the credits
+"
+" TODO toggle me
 
 " Only do this when not done yet for this buffer
 if exists("b:did_ftplugin")
@@ -11,8 +15,12 @@ endif
 " TODO think of better keyboard shortcuts
 nnoremap <buffer> + :call NewTask()<cr>A
 nnoremap <buffer> = :call ToggleComplete()<cr>
+
+" TODO this is also mapped to Enter, why?
 nnoremap <buffer> <C-M> :call ToggleCancel()<cr>
+" TODO archiving tasks doesn't work
 nnoremap <buffer> - :call ArchiveTasks()<cr>
+" TODO separator doesn't work
 abbr -- <c-r>=Separator()<cr>
 
 " when pressing enter within a task it creates another task
@@ -26,6 +34,7 @@ function! ToggleComplete()
     s/ *@done.*$//
   elseif line =~ "^ *☐"
     s/^\( *\)☐/\1✔/
+    " TODO have an option for the date format
     let text = " @done (" . strftime("%Y-%m-%d %H:%M") .")"
     exec "normal A" . text
     normal _
@@ -45,6 +54,7 @@ function! ToggleCancel()
   endif
 endfunc
 
+" TODO What is A and I?
 function! NewTask()
   let line=getline('.')
   if line =~ "^ *$"
