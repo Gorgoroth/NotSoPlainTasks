@@ -5,88 +5,115 @@ augroup NotSoPlainTasks
   autocmd BufWritePost * call SearchForTodos()
 augroup END
 
-function! CompareTodos(project_file_todo, start, finish, buffer_todo)
+" ----------------------------------------------------------------------------
+" --- Check in project file todo block for matches with buffer_line
+" ---
+" Returns 1 if a match is found and a line from the project has been removed
+" Returns 0 if no match has been found
+" ----------------------------------------------------------------------------
+function! CheckForTodoMatches(project_file, start, finish, buffer_line, return_list)
 
-  " Source code file is authorative
-  " Except for cancelled and done tasks, as well as tasks without line numbers
+  " Setup our variables for analyzing
+  let line = matchstr(a:buffer_line, '\d*:.*')
+  let line_number = matchstr(a:buffer_line, '\d*:')
+  let line_comment_temp = split(line, ': ')
+  let line_comment = line_comment_temp[1]
 
-  " Cases
-  "   1. User adds new todo in source code
-  "   2. User removes todo in source code
-  "   3. User changes todo text
-  "   4. User changes source code so todo line number changes
-  "   5. changes source code and todo tex
-  "   6. User marks task as done in project todo
-  "   7. User creates new tasks in project todo
-  "
-  " Case 1: Create new todo
-  " Case 2: Remove todo/mark as done
-  " Case 3: like below
-  " Case 4: Try to find matching todo and update
-  " Case 5: Create new todo, then clean up orphaned todos without matches
-  " Case 6: Remove todo line in source code
-  " Case 7: Do nothing if there is no line number, simply keep at position
+  " Loop through project_file
+  let file_line_ctr = a:start
+  while file_line_ctr <= a:finish
+    " Setup current project file line variables
+    let file_todo_item = get(a:project_file, file_line_ctr)
+    " let file_line = matchstr(file_todo_item, '\d*:.*')
+    let file_line_number = match(file_todo_item, '\d*:')
+    let file_line_comment_temp = split(file_todo_item, ': ')
+    let file_line_comment = line_comment_temp[1]
 
-  " For now lets simply mark all removed tasks as done
-  " and create new tasks for those that have no clear matches
+    " --- first handle matching line numbers
+    let line_number_match = match(line_number, file_line_number)
+    if(line_number_match != -1)
+      call add(a:return_list, a:buffer_line)
+      call remove(a:project_file, file_line_ctr)
+      " Matching comment found, return successful
+      return 1
+    endif
 
-  " let return_list = deepcopy(a:project_file_todo)
+    " --- Second handle matching comments
+    let line_comment_match = match(line_comment, file_line_comment)
+    if(line_comment_match != -1)
+      " Line number most likely does not match, so update from buffer
+      call add(a:return_list, a:buffer_line)
+      call remove(a:project_file, file_line_ctr)
+      " Matching comment found, return successful
+      return 1
+    endif
+
+    " Nothing found yet, keep looking
+    let file_line_ctr += 1
+  endwhile
+
+  " No matching comment found, return unsuccessful
+  return 0
+endfunction
+
+" ----------------------------------------------------------------------------
+" --- Handles removing and marking tasks as done
+" ----------------------------------------------------------------------------
+function! CleanProjectFile(project_file, start, finish)
+  echom 'CleanProjectFile()'
+  " All matches have already been removed
+  " So we can safely remove all lines that don't fit our criteria
+  " TODO remove debug echos
+  echom 'Remove between '.(a:start).' and '.(a:finish)
+
+  let finish = a:finish
+  let remove_lines = a:start
+  while remove_lines < finish
+    let item_to_remove = get(a:project_file, remove_lines)
+    " TODO don't remove tasks without linenumbers
+    " TODO don't remove completed tasks
+    " TODO don't remove cancelled tasks
+    echom "Remove item in line ".remove_lines." content: ".item_to_remove
+    call remove(a:project_file, remove_lines)
+    " let remove_lines += 1
+    let finish -= 1
+  endwhile
+
+endfunction
+
+" ----------------------------------------------------------------------------
+" --- Handles adding of new tasks
+" ----------------------------------------------------------------------------
+function! AddNewTodo()
+
+endfunction
+
+" ----------------------------------------------------------------------------
+" --- Handles buffer and project file comparison
+" ----------------------------------------------------------------------------
+function! CompareTodos(project_file, start, finish, buffer_todo)
+  echom 'CompareTodos()'
   let return_list = []
   let removed_file_lines_ctr = 0
+  let finish = a:finish
 
   " so loop through buffer_todo
   let buf_line_ctr = 0
   while buf_line_ctr < len(a:buffer_todo)
     " Get current buffer item
     let buffer_todo_item = get(a:buffer_todo, buf_line_ctr)
+    " Keep track of if we have found a match in the project todo
+    " for the current buffer item
     let found_match = 0
 
-    " Setup our variables for analyzing
-    let line = matchstr(buffer_todo_item, '\d*:.*')
-    let line_number = matchstr(buffer_todo_item, '\d*:')
-    let line_comment_temp = split(line, ': ')
-    let line_comment = line_comment_temp[1]
+    " --- Check if the current buffer line has a match in the project file
+    let found_match = CheckForTodoMatches(a:project_file, a:start, finish, buffer_todo_item, return_list)
+    let removed_file_lines_ctr += found_match
+    " Since we remove entries in CheckForTodoMatches, we need to keep the
+    " bound up to date
+    let finish -= found_match
 
-    " Loop through project_file_todo
-    let file_line_ctr = a:start
-    while file_line_ctr < a:finish
-      " Get current file item
-      let file_todo_item = get(a:project_file_todo, file_line_ctr)
-
-      " Setup current line variables
-      let fileline = matchstr(buffer_todo_item, '\d*:.*')
-      let file_line_number = match(file_todo_item, '\d*:')
-      let file_line_comment_temp = split(line, ': ')
-      let file_line_comment = line_comment_temp[1]
-
-      " --- first handle matching line numbers
-      let line_number_match = match(line_number, file_line_number)
-      if(line_number_match != -1)
-        call add(return_list, buffer_todo_item)
-        call remove(a:project_file_todo, file_line_ctr)
-        let removed_file_lines_ctr += 1
-        " line number found, we're done with this buffer line, break out of loop
-        let found_match = 1
-        break
-      endif
-
-      " --- Second handle matching comments
-      let line_comment_match = match(line_comment, file_line_comment)
-      if(line_comment_match != -1)
-        " Line number most likely does not match, so update from buffer
-        call add(return_list, buffer_todo_item)
-        call remove(a:project_file_todo, file_line_ctr)
-        let removed_file_lines_ctr += 1
-
-        " comment found, we're done with this buffer line, break out of loop
-        let found_match = 1
-        break
-      endif
-
-      let file_line_ctr += 1
-    endwhile
-
-    " --- Third add new todos
+    " --- If no match is found, add as new todo
     if(found_match == 0)
       call add(return_list, buffer_todo_item)
     endif
@@ -94,54 +121,15 @@ function! CompareTodos(project_file_todo, start, finish, buffer_todo)
     let buf_line_ctr += 1
   endwhile
 
-  " --- Fourth remove all comments with no matches
-  " All matches have already been removed
-  " So we can safely remove all lines that don't fit our criteria
-  " TODO remove debug echos
-  echom "We have removed ".removed_file_lines_ctr." lines"
-  echom 'Remove between '.(a:start).' and '.(a:finish-removed_file_lines_ctr)
+  " --- Handle tasks that have no match in the current buffer
+  call CleanProjectFile(a:project_file, a:start, finish)
 
-  let remove_lines = a:start
-  while remove_lines < (a:finish-removed_file_lines_ctr)
-    let file_todo_item = get(a:project_file_todo, file_line_ctr)
-    " TODO don't remove tasks without linenumbers
-    " TODO don't remove completed tasks
-    " TODO don't remove cancelled tasks
-    echom "Remove item".remove_lines
-    call remove(a:project_file_todo, remove_lines)
-    let remove_lines += 1
-  endwhile
-
-  echom 'Show between '.a:start.' and '.(a:finish-removed_file_lines_ctr-remove_lines)
-  let i = a:start
-  while i < a:finish-removed_file_lines_ctr-remove_lines
-    let test = get(a:project_file_todo, i)
-    echom 'Still in there '.test
-  endwhile
-
-  " End our block with a newline
-  " TODO remove commented code, thats what git is for
-  " TODO or uncomment this and see what happens
-  " TODO bulk comment test
-  " TODO why
-  " TODO does
-  " TODO this
-  " TODO eat
-  " TODO the
-  " TODO next
-  " TODO lines?
-  " TODO explain!
-  " TODO it
-  " TODO does
-  " TODO not
-  " TODO anymore
-  " TODO but now again
-  call add(return_list, '')
   return return_list
 endfunction
 
 " --- Add all todo from comments to project.todo in working folder root
 function! SaveTodo(lines)
+  echom 'SaveTodo()'
   let filename = bufname('%')
   let todo_filename = getcwd().'/project.todo'
   let todo_file = []
@@ -197,7 +185,7 @@ function! SearchForTodos()
       let i += 1
     endw
     " Handle todos for current buffer
-    " TODO something
+    " TODO skip this test if we found no todos
     call SaveTodo(lines)
   endif
 endfunction

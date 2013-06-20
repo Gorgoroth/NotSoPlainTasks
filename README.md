@@ -25,3 +25,28 @@ In your \*.todo-files, you can use the following keys in normal mode:
     <C-M> - toggle cancel
     - - archive tasks
     --<space> - insert a separator line
+
+## Notes
+Source code file is authorative
+Except for cancelled and done tasks, as well as tasks without line numbers
+
+Cases
+  1. User adds new todo in source code
+  2. User removes todo in source code
+  3. User changes todo text
+  4. User changes source code so todo line number changes
+  5. changes source code and todo tex
+  6. User marks task as done in project todo
+  7. User creates new tasks in project todo
+
+Case 1: Create new todo
+Case 2: Remove todo/mark as done
+Case 3: like below
+Case 4: Try to find matching todo and update
+Case 5: Create new todo, then clean up orphaned todos without matches
+Case 6: Remove todo line in source code
+Case 7: Do nothing if there is no line number, simply keep at position
+
+For now lets simply mark all removed tasks as done
+and create new tasks for those that have no clear matches
+

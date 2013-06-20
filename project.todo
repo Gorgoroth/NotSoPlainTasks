@@ -4,32 +4,17 @@ This is a general discription and should not be touched by the plugin
 FILE plugin/plaintasks.vim:
 ☐ 1: have file comment header
 ☐ 2: have comment headers for each function
-☐ 100: remove debug echos
-☐ 107: don't remove tasks without linenumbers
-☐ 108: don't remove completed tasks
-☐ 109: don't remove cancelled tasks
-☐ 123: remove commented code, thats what git is for
-☐ 124: or uncomment this and see what happens
-☐ 125: bulk comment test
-☐ 126: why
-☐ 127: does
-☐ 128: this
-☐ 129: eat
-☐ 130: the
-☐ 131: next
-☐ 132: lines?
-☐ 133: explain!
-☐ 134: it
-☐ 135: does
-☐ 136: not
-☐ 137: anymore
-☐ 138: but now again
-☐ 191: .*\C')
-☐ 193: ')[0]
-☐ 200: something
+☐ 66: remove debug echos
+☐ 73: don't remove tasks without linenumbers
+☐ 74: don't remove completed tasks
+☐ 75: don't remove cancelled tasks
+☐ 179: .*\C')
+☐ 181: ')[0]
+☐ 188: skip this test if we found no todos
 
 
-
+FILE ftplugin/plaintasks.vim:
+☐ 5: update file header
 ☐ 6: but keep the credits
 ☐ 8: toggle me
 ☐ 15: think of better keyboard shortcuts
@@ -40,4 +25,8 @@ FILE plugin/plaintasks.vim:
 ☐ 37: have an option for the date format
 ☐ 57: What is A and I?
 
+
+FILE ftdetect/plaintasks.vim:
+☐ 1: add file header and documentation
+☐ 2: set filetype=plaintasks
 
