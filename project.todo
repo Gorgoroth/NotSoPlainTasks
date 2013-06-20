@@ -1,17 +1,20 @@
 GENERAL:
 This is a general discription and should not be touched by the plugin
+☐ Refactor file into smaller functions
+☐ Refactor file to make clear, when and where variables are changed
 
 FILE plugin/plaintasks.vim:
 ☐ 1: have file comment header
 ☐ 2: have comment headers for each function
-☐ 66: remove debug echos
-☐ 73: don't remove tasks without linenumbers
-☐ 74: don't remove completed tasks
-☐ 75: don't remove cancelled tasks
-☐ 179: .*\C')
-☐ 181: ')[0]
-☐ 188: skip this test if we found no todos
-
+☐ 63: explain better what CleanProjectFile() does
+☐ 95: don't remove tasks without linenumbers
+☐ 120: explain better what CompareTodos() function does
+✔ 57: another test @done (2013-06-20 15:16)
+✔ 105: don't remove cancelled tasks @done (2013-06-20 15:13)
+✔ 161: explain what SaveTodo() function does @done (2013-06-20 15:12)
+✔ 228: skip this test if we found no todos @done (2013-06-20 15:08)
+✔ 138: lets see if we can solve this better @done (2013-06-20 15:02)
+✔ 146: this is also @done (2013-06-20 15:02)
 
 FILE ftplugin/plaintasks.vim:
 ☐ 5: update file header
@@ -24,7 +27,6 @@ FILE ftplugin/plaintasks.vim:
 ☐ 27: checkout why this doesnt work
 ☐ 37: have an option for the date format
 ☐ 57: What is A and I?
-
 
 FILE ftdetect/plaintasks.vim:
 ☐ 1: add file header and documentation
