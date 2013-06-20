@@ -1,234 +1,280 @@
 " TODO have file comment header
-" TODO have comment headers for each function
 
 augroup NotSoPlainTasks
-  autocmd BufWritePost * call SearchForTodos()
+  autocmd BufWritePost * call NotSoPlainTasks()
+  autocmd FileType plaintasks setlocal foldmethod=marker
+  autocmd FileType plaintasks setlocal foldclose=all
 augroup END
 
 " ----------------------------------------------------------------------------
-" --- Check in project file todo block for matches with buffer_line
-" ---
-" Returns 1 if a match is found and a line from the project has been removed
-" Returns 0 if no match has been found
+" --- This is our main function that ties the plugin together
 " ----------------------------------------------------------------------------
-function! CheckForTodoMatches(project_file, start, finish, buffer_line, return_list)
+function! NotSoPlainTasks()
+  let todo_file_block = []
+  let open_tasks = []
+  let done_tasks = []
+  let cancelled_tasks = []
 
-  " Setup our variables for analyzing
-  let line = matchstr(a:buffer_line, '\d*:.*')
-  let line_number = matchstr(a:buffer_line, '\☐ d*:')
-  let line_comment_temp = split(line, ': ')
-  let line_comment = line_comment_temp[1]
+  let current_todos = GetCurrentTodosFromBuffer()
+  let start = CutOrCreateRelevantTodoBlock(todo_file_block, bufname('%'))
 
-  " Loop through project_file
-  let file_line_ctr = a:start
-  while file_line_ctr < a:finish
-    " Setup current project file line variables
-    let file_todo_item = get(a:project_file, file_line_ctr)
-    if(file_todo_item !~ '☐ ')
-      " If file line does not contain an open task, skip
-      let file_line_ctr += 1
-      continue
-    endif
-    let file_line_number = matchstr(file_todo_item, '☐ \d*:')
-    let file_line_comment_temp = split(file_todo_item, ': ')
-    let file_line_comment = file_line_comment_temp[1]
+  if(todo_file_block != [])
+    let user_tasks = GetLinesFromBlock(todo_file_block, 'user_tasks')
+    let open_tasks = GetLinesFromBlock(todo_file_block, 'open_tasks')
+    let done_tasks = GetLinesFromBlock(todo_file_block, 'done_tasks')
+    let cancelled_tasks = GetLinesFromBlock(todo_file_block, 'cancelled_tasks')
+  endif
 
-    " --- first handle matching line numbers
-    if(line_number =~ file_line_number)
-      call add(a:return_list, a:buffer_line)
-      call remove(a:project_file, file_line_ctr)
-      " Matching comment found, return successful
-      return 1
-    endif
+  " Handle creation and marking of tasks
+  call HandleTaskManagement(current_todos, open_tasks, done_tasks)
 
-    " --- Second handle matching comments
-    if(line_comment =~ file_line_comment)
-      " Line number most likely does not match, so update from buffer
-      call add(a:return_list, a:buffer_line)
-      call remove(a:project_file, file_line_ctr)
-      " Matching comment found, return successful
-      return 1
-    endif
-
-    " Nothing found yet, keep looking
-    let file_line_ctr += 1
-  endwhile
-
-  " No matching comment found, return unsuccessful
-  return 0
+  " Write tasks to file in our format
+  call WriteTasksToFile(start, current_todos, open_tasks, done_tasks, cancelled_tasks)
 endfunction
 
 " ----------------------------------------------------------------------------
-" --- Handles removing and marking tasks as done
-" TODO explain better what CleanProjectFile() does
+" --- Searches buffer for todos and returns a list of them
 " ----------------------------------------------------------------------------
-function! CleanProjectFile(project_file, start, finish)
-  " All matches have already been removed
-  " So we can safely remove all lines that don't fit our criteria
+function! GetCurrentTodosFromBuffer()
+  let lines = []
 
-  echom 'Currently still in file: '
-  let i = a:start
-  while i < a:finish
-    let item = get(a:project_file, i)
-    echom ' * '.item
-    let i += 1
+  " Skip files in our blacklist
+  if(bufname('%') !~ '.*\.todo')
+    let i = 0
+    while i <= line('$')
+      let line = getline(i)
+
+      " We want to use this plugin for this file, so we need to skip the
+      " regexes a few lines below this
+      if(line =~# 'TODO \.\*')
+        let i += 1
+        continue
+      endif
+
+      " Try to weed out unwanted triggers, keyword must follow comment
+      " characters immediately
+      if( (line =~# '" TODO .*') || (line =~# '// TODO .*') || (line =~# '# TODO .*') || (line =~# '/* TODO .*') )
+        let exact_match = split(line, 'TODO ')[1]
+        " Assemble new task
+        let templine = '☐ '.i.': '.exact_match
+        call add(lines, templine)
+      endif
+      let i += 1
+    endw
+  endif
+  return lines
+endfunction
+
+" ----------------------------------------------------------------------------
+" --- Cut out the relevant block and leave just header and newline
+" --- or create header and new line
+" --- Returns pointer to start for safe writing
+" --- Also, cut out really means delete
+" ----------------------------------------------------------------------------
+function! CutOrCreateRelevantTodoBlock(relevant_block, current_filename)
+  let header = 'FILE '.a:current_filename.':'
+  let footer = ''
+
+  let todo_filename = getcwd().'/project.todo'
+  let todo_file = []
+  let start = 1
+
+  " If project todo file already exists, read it
+  let file_exists = findfile(todo_filename)
+  if(file_exists != '')
+    let todo_file = readfile(todo_filename)
+
+    " Get region for current filename
+    let start = match(todo_file, header)
+    if(start != -1)
+      " We do not want to manipulate the todo group header
+      let start += 1
+      " If there is already an entry, check for existing todos
+      let finish = match(todo_file, 'FILE .*:', start)
+      " If there is no file group todo list after ours then its EOF
+      if(finish == -1)
+        let finish = len(todo_file)
+      endif
+      " Since we match the occurence of FILE, the block ends on line prior
+      let finish -= 1
+
+      " Copy the relevant part
+      let index = 0
+      while index < finish
+        let line = get(todo_file, index)
+        call add(a:relevant_block, line)
+      endwhile
+      " And remove it
+      call remove(todo_file, start, finish)
+    endif
+  endif
+
+  " In case we didn't find the file or block, create it
+  if(nothing_found == 1)
+    call add(todo_file, header)
+    call add(todo_file, footer)
+  endif
+
+  " Write changes to file
+  call writefile(todo_file, todo_filename)
+
+  return start
+endfunction
+
+" ----------------------------------------------------------------------------
+" --- Searches project file and returns a list of matching lines
+" ----------------------------------------------------------------------------
+function! GetLinesFromBlock(file_block, type)
+  let matching_lines = []
+  let mark = ''
+  let not_mark = ''
+
+  if(a:type =~ 'user_tasks')
+    let mark = '☐ .*'
+    let not_mark = '☐ \d*:.*'
+  elseif(a:type =~ 'open_tasks')
+    let mark = '☐ \d*:.*'
+  elseif(a:type =~ 'done_tasks')
+    let mark = '✔.*'
+  elseif(a:type =~ 'cancelled_tasks')
+    let mark = '✘.*'
+  else
+    " Not a valid option
+    return []
+  endif
+
+  " Because we manipulate the array we iterate over this is a bit tricky.
+  " If we do not find an item we increment the index
+  " If we find and delete a line, we keep the line index but decrement the upper bound
+  " That is because we stay in the same line and the next ones move up if we
+  " delete a list item
+  let finish = len(a:file_block)
+  let index = 0
+  while index < finish
+    let current_line = get(a:file_block, index)
+    if((current_line =~ mark) && (current_line !~ not_mark))
+      call add(matching_lines, current_line)
+      call remove(a:file_block, index)
+      let finish -= 1
+      continue
+    endif
+    let index += 1
   endwhile
+
+  return matching_lines
+endfunction
+
+" ----------------------------------------------------------------------------
+" --- Loops through the current task in the buffer and either moves them to
+" --- the open or done tasks
+" ----------------------------------------------------------------------------
+function! HandleTaskManagement(current_todos, open_tasks, done_tasks)
+  " First, mark open tasks as done that are not in the buffer anymore
+  let open_finish = 0
+  let open_index = 0
+  while open_index < open_finish
+    let match_found = 0
+    let open_line = get(a:open_tasks, index)
+    let open_line_number = matchstr(open_line, '☐ \d*:')
+    let open_line_comment_temp = split(open_line, ': ')
+    let open_line_comment = open_line_comment_temp[1]
+
+    let finish = len(current_todos)
+    let index = 0
+    while index < finish
+      let current_todo_line = get(current_todos, index)
+      let current_todo_line_number = matchstr(current_todo_line, '☐ \d*:')
+      let current_todo_line_comment_temp = split(current_todo_line, ': ')
+      let current_todo_line_comment = current_todo_line_comment_temp[1]
+
+      if(current_todo_line_comment =~ open_line_comment)
+        " Update open tasks and remove from current todo
+        a:open_tasks[open_index] = current_todo_line
+        call remove(a:current_todos, index)
+        let match_found = 1
+        break
+      endif
+      let index += 1
+    endwhile
 
   " Because we manipulate the array we iterate over this is a bit tricky.
   " If we change an item we increment the line_index
   " If we delete a line, we keep the line index but decrement the upper bound
   " That is because we stay in the same line and the next ones move up if we
   " delete a list item
-  let finish = a:finish
-  let line_index = a:start
-  while line_index <= finish
-    let item_to_remove = get(a:project_file, line_index)
-
-    if(item_to_remove =~ '☐ \d*:.*')
-      " Task has been removed from source, so mark as done
-      let a:project_file[line_index] = substitute(a:project_file[line_index], '☐', '✔', '')
-      let a:project_file[line_index] .= " @done (" . strftime("%Y-%m-%d %H:%M") .")"
-      let line_index += 1
-    elseif(item_to_remove =~ '☐ .*')
-      " Task has no line number and was most likely added by user
-      " do nothing
-      " TODO don't remove tasks without linenumbers
-      let line_index += 1
-    elseif(item_to_remove =~ '✔.*')
-      " Task was previously marked as done
-      " do nothing
-      let line_index += 1
-    elseif(item_to_remove =~ '✘.*')
-      " Task was cancelled by user
-      " do nothing
-      let line_index += 1
+    if(match_found != 1)
+      " No match in current buffer found, it was most likely removed,
+      " so mark as done
+      call add(done_tasks, substitute(a:done_tasks[open_index], '☐', '✔', '')." @done (" . strftime("%Y-%m-%d %H:%M") .")")
+      call remove(open_tasks, open_index)
+      let open_index -= 1
     else
-      " Line does not fit our criteria, remove
-      call remove(a:project_file, line_index)
-      let finish -= 1
+      open_index += 1
     endif
   endwhile
 
-  " Add new line at the end for structure
-  call insert(a:project_file, '', finish+1)
-
-endfunction
-
-
-" ----------------------------------------------------------------------------
-" --- Handles buffer and project file comparison
-" TODO explain better what CompareTodos() function does
-" ----------------------------------------------------------------------------
-function! CompareTodos(project_file, start, finish, buffer_todo)
-  let return_list = []
-  let removed_file_lines_ctr = 0
-  let finish = a:finish
-
-  " so loop through buffer_todo
-  let buf_line_ctr = 0
-  while buf_line_ctr < len(a:buffer_todo)
-    " Get current buffer item
-    let buffer_todo_item = get(a:buffer_todo, buf_line_ctr)
-    " Keep track of if we have found a match in the project todo
-    " for the current buffer item
-    let found_match = 0
-
-    " --- Check if the current buffer line has a match in the project file
-    let found_match = CheckForTodoMatches(a:project_file, a:start, finish, buffer_todo_item, return_list)
-    let removed_file_lines_ctr += found_match
-    " Since we remove entries in CheckForTodoMatches, we need to keep the
-    " bound up to date
-    let finish -= found_match
-
-    " --- If no match is found, add as new todo
-    if(found_match == 0)
-      call add(return_list, buffer_todo_item)
-    endif
-
-    let buf_line_ctr += 1
-  endwhile
-
-  " --- Handle tasks that have no match in the current buffer
-  call CleanProjectFile(a:project_file, a:start, finish)
-
-  return return_list
-endfunction
-
-" ----------------------------------------------------------------------------
-" --- Add all todo from comments to project.todo in working folder root
-" --- Takes list of todos from buffer as parameter
-" --- Then searches in project.todo if current buffer has an entry
-" --- if yes, CompareTodos is called, which handles marking
-" --- if not, entry is created and the buffer todos added to the file todos
-" --- it then saves the changes to the project.todo
-" ----------------------------------------------------------------------------
-function! SaveTodo(lines)
-  let filename = bufname('%')
-  let todo_filename = getcwd().'/project.todo'
-  let todo_file = []
-
-  " If project todo file already exists, read it
-  let file_exists = findfile(todo_filename)
-  if(file_exists != '')
-    let todo_file = readfile(todo_filename)
-  endif
-
-  " Get region for current filename
-  let start = match(todo_file, 'FILE '.filename.':')
-  if(start != -1)
-    " We do not want to manipulate the todo group header
-    let start += 1
-    " If there is already an entry, check for existing todos
-    let finish = match(todo_file, 'FILE .*:', start)
-    " If there is no file group todo list after ours then its EOF
-    if(finish == -1)
-      let finish = len(todo_file)
-    endif
-    " Since we match the occurence of FILE, the block ends on line prior
+  " Second, add each from buffer todos that has not been touched
+  " All that are now still in the buffer have no matches and are therefore new
+  let finish = len(a:current_todos)
+  let index = 0
+  while index < finish
+    call add(a:open_tasks, a:current_todos[index])
+    call remove(a:current_todos, index)
     let finish -= 1
+  endwhile
+endfunction
 
-    " Handle comparing todos from buffer and source code
-    let write_file = CompareTodos(todo_file, start, finish, a:lines)
-    call extend(todo_file, write_file, start)
-  else
-    " Insert new block at end of file
-    call insert(a:lines, 'FILE '.filename.':', 0)
-    call add(a:lines, '')
-    call extend(todo_file, a:lines)
+" ----------------------------------------------------------------------------
+" --- Writes tasks to file
+" --- Requirement: projects.todo must have been created, start must point to
+" --- one line after file todo group header
+" ----------------------------------------------------------------------------
+function! WriteTasksToFile(start, user_todos, open_tasks, done_tasks, cancelled_tasks)
+  let todo_filename = getcwd().'/project.todo'
+  let todo_file = readfile(todo_filename)
+  let index = a:start
+
+  " --- Add user tasks after file group todo header
+  if(!empty(a:user_tasks))
+    call extend(todo_file, a:user_tasks, index)
+    let index += len(a:user_tasks)
   endif
 
+  " --- Add open tasks in order of appearance in source code
+  if(!empty(a:open_tasks))
+    call extend(todo_file, a:open_tasks, index)
+    let index += len(a:open_tasks)
+  endif
+
+  " --- If there are done or cancelled tasks, add fold marker
+  if(!empty(a:done_tasks) || !empty(a:cancelled_tasks))
+    call insert(todo_file, '{{{', index)
+    let index += 1
+  endif
+
+  " --- Add done tasks if any
+  if(!empty(a:done_tasks))
+    call extend(todo_file, a:done_tasks, index)
+    let index += len(a:done_tasks)
+  endif
+
+  " --- Add cancelled tasks if any
+  if(!empty(a:cancelled_tasks))
+    call extend(todo_file, a:cancelled_tasks, index)
+    let index += len(a:cancelled_tasks)
+  endif
+
+  " --- Add fold end marker if necessary
+  if(!empty(a:done_tasks) || !empty(a:cancelled_tasks))
+    call insert(todo_file, '}}}', index)
+    let index += 1
+  endif
+
+  " --- Add newline
+  call insert(todo_file, '', index)
+  let index += 1
+
+  " --- Write to file
   call writefile(todo_file, todo_filename)
 endfunction
 
-" ----------------------------------------------------------------------------
-" --- Searches buffer for todosand puts them in a list
-" then calls SaveTodo with the list as parameter
-" ----------------------------------------------------------------------------
-function! SearchForTodos()
-  let blacklist_match = match(bufname('%'), '.*\.todo')
-  if(blacklist_match == -1)
-    " First look for todos in current buffer
-    let lines = []
-    let i = 0
-    while i <= line('$')
-      let line = getline(i)
-      let match = matchstr(line, 'TODO .*\C')
-
-      " We need to skip the next line so we can use todo for this exact file
-      if(line =~# 'TODO \.\*')
-        let i += 1
-        continue
-      endif
-      if( (line =~# '" TODO .*') || (line =~# '// TODO .*') || (line =~# '# TODO .*') || (line =~# '/* TODO .*') )
-        let exact_match = split(match, 'TODO ')[0]
-        let templine = '☐ '.i.': '.exact_match
-        call add(lines, templine)
-      endif
-      let i += 1
-    endw
-    " Handle todos for current buffer
-    if(lines != [])
-      call SaveTodo(lines)
-    endif
-  endif
-endfunction

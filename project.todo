@@ -5,10 +5,19 @@ This is a general discription and should not be touched by the plugin
 
 FILE plugin/plaintasks.vim:
 ☐ 1: have file comment header
-☐ 2: have comment headers for each function
-☐ 63: explain better what CleanProjectFile() does
-☐ 95: don't remove tasks without linenumbers
-☐ 120: explain better what CompareTodos() function does
+✔ 336: explain better what CleanProjectFile() does @done (2013-06-20 19:53)
+✔ 368: don't remove tasks without linenumbers @done (2013-06-20 19:53)
+✔ 393: explain better what CompareTodos() function does @done (2013-06-20 19:53)
+✔ 64: Add done tasks if any @done (2013-06-20 19:52)
+✔ 65: add cancelled tasks if any @done (2013-06-20 19:52)
+✔ 66: Add fold end marker if necessary @done (2013-06-20 19:52)
+✔ 72: Add newline @done (2013-06-20 19:52)
+✔ 382: explain better what CompareTodos() function does @done (2013-06-20 19:52)
+✔ 29: clean file todo group between header and new line @done (2013-06-20 19:50)
+✔ 30: Add user tasks after file group todo header @done (2013-06-20 19:50)
+✔ 31: Add open tasks in order of appearance in source code @done (2013-06-20 19:50)
+✔ 32: If there are done or cancelled tasks, add fold marker @done (2013-06-20 19:50)
+✔ 2: have comment headers for each function @done (2013-06-20 17:56)
 ✔ 57: another test @done (2013-06-20 15:16)
 ✔ 105: don't remove cancelled tasks @done (2013-06-20 15:13)
 ✔ 161: explain what SaveTodo() function does @done (2013-06-20 15:12)
