@@ -1,14 +1,12 @@
 GENERAL:
 This is a general discription and should not be touched by the plugin
-☐ Refactor file into smaller functions
-☐ Refactor file to make clear, when and where variables are changed
 
 FILE plugin/plaintasks.vim:
 ☐ Refactor file into smaller functions
 ☐ Refactor file to make clear, when and where variables are changed
-☐ 1: have file comment header
-☐ 182: see, if we can make the filter smarter
+☐ 185: see, if we can make the filter smarter
 {{{
+✔ 1: have file comment header @done (2013-06-21 14:29)
 ✔ 61: we can see if this works @done (2013-06-21 14:19)
 ✔ 54: within code so @done (2013-06-21 14:19)
 ✔ 40: test comments @done (2013-06-21 14:19)
@@ -27,18 +25,19 @@ FILE plugin/plaintasks.vim:
 }}}
 
 FILE ftplugin/plaintasks.vim:
-☐ 5: update file header
-☐ 6: but keep the credits
-☐ 8: toggle me
-☐ 15: think of better keyboard shortcuts
-☐ 19: this is also mapped to Enter, why?
-☐ 21: archiving tasks doesn't work
-☐ 23: separator doesn't work
-☐ 27: checkout why this doesnt work
-☐ 37: have an option for the date format
-☐ 57: What is A and I?
+☐ 13: think of better keyboard shortcuts
+☐ 17: this is also mapped to Enter, why?
+☐ 19: separator doesn't work
+☐ 23: checkout why this doesnt work
+☐ 33: have an option for the date format
+☐ 53: What is A and I?
+{{{
+✔ 20: archiving tasks doesn't work @done (2013-06-21 14:35)
+✔ 8: toggle me @done (2013-06-21 14:33)
+✔ 6: but keep the credits @done (2013-06-21 14:33)
+✔ 5: update file header @done (2013-06-21 14:33)
+}}}
 
 FILE ftdetect/plaintasks.vim:
 ☐ 1: add file header and documentation
-☐ 2: set filetype=plaintasks
 

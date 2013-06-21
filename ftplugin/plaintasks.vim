@@ -1,11 +1,9 @@
-"Vim filetype plugin
+" ftplugin/plaintasks.vim - Vim filetype plugin for PlainTasks
 " Language: PlainTasks
-" Maintainer: David Elentok
-" ArchiveTasks() added by Nik van der Ploeg
-" TODO update file header
-" TODO but keep the credits
-"
-" TODO toggle me
+" Author: Valentin Klinghammer <hacking.quelltextfabrik.de>
+" Original: David Elentok
+" Version: 1.0
+" License: Same as Vim itself, see :help license
 
 " Only do this when not done yet for this buffer
 if exists("b:did_ftplugin")
@@ -18,8 +16,6 @@ nnoremap <buffer> = :call ToggleComplete()<cr>
 
 " TODO this is also mapped to Enter, why?
 nnoremap <buffer> <C-M> :call ToggleCancel()<cr>
-" TODO archiving tasks doesn't work
-nnoremap <buffer> - :call ArchiveTasks()<cr>
 " TODO separator doesn't work
 abbr -- <c-r>=Separator()<cr>
 
@@ -62,42 +58,6 @@ function! NewTask()
   else
     normal I☐
   end
-endfunc
-
-function! ArchiveTasks()
-    let orig_line=line('.')
-    let orig_col=col('.')
-    let archive_start = search("^Archive:")
-    if (archive_start == 0)
-        call cursor(line('$'), 1)
-        normal 2o
-        normal iArchive:
-        normal o＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
-        let archive_start = line('$') - 1
-    endif
-    call cursor(1,1)
-
-    let found=0
-    let a_reg = @a
-    if search("✔", "", archive_start) != 0
-        call cursor(1,1)
-        while search("✔", "", archive_start) > 0
-            if (found == 0)
-                normal "add
-            else
-                normal "Add
-            endif
-            let found = found + 1
-            call cursor(1,1)
-        endwhile
-
-        call cursor(archive_start + 1,1)
-        normal "ap
-    endif
-
-    "clean up
-    let @a = a_reg
-    call cursor(orig_line, orig_col)
 endfunc
 
 function! Separator()

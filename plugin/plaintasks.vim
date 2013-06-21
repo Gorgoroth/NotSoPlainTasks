@@ -1,4 +1,7 @@
-" TODO have file comment header
+" plugin/plaintasks.vim - NotSoPlainTasks
+" Author: Valentin Klinghammer <hacking.quelltextfabrik.de>
+" Version: 1.0
+" License: Same as Vim itself, see :help license
 
 augroup NotSoPlainTasks
   autocmd BufWritePost * call NotSoPlainTasksHandleBuffer()
