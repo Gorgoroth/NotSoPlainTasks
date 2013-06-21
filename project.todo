@@ -26,7 +26,7 @@ FILE plugin/plaintasks.vim:
 }}}
 
 FILE ftplugin/plaintasks.vim:
-☐ 55: have an option for the date format
+☐ 67: have an option for the date format
 {{{
 ✔ 27: checkout why this doesnt work @done (2013-06-21 23:29)
 ✔ 23: think of better keyboard shortcuts @done (2013-06-21 23:29)
