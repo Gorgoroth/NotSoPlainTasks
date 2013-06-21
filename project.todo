@@ -6,14 +6,11 @@ This is a general discription and should not be touched by the plugin
 FILE plugin/plaintasks.vim:
 ☐ Refactor file into smaller functions
 ☐ Refactor file to make clear, when and where variables are changed
-☐ Refactor file into smaller functions
-☐ Refactor file to make clear, when and where variables are changed
 ☐ 1: have file comment header
 ☐ 40: creating a few
 ☐ 41: test comments
 ☐ 55: within code so
 ☐ 62: we can see if this works
-
 ✔ 29: clean file todo group between header and new line @done (2013-06-20 19:50)
 ✔ 30: Add user tasks after file group todo header @done (2013-06-20 19:50)
 ✔ 31: Add open tasks in order of appearance in source code @done (2013-06-20 19:50)

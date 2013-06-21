@@ -11,7 +11,7 @@ augroup END
 " ----------------------------------------------------------------------------
 function NotSoPlainTasksHandleBuffer()
   echom 'NotSoPlainTasksHandleBuffer'
-  let todo_file_block = []
+  let relevant_block = []
   let user_tasks = []
   let open_tasks = []
   let done_tasks = []
@@ -21,13 +21,13 @@ function NotSoPlainTasksHandleBuffer()
   if(current_todos == [])
     return
   endif
-  let start = CutOrCreateRelevantTodoBlock(todo_file_block, bufname('%'))
+  let start = CutOrCreateRelevantTodoBlock(relevant_block, bufname('%'))
 
-  if(todo_file_block != [])
-    let user_tasks = GetLinesFromBlock(todo_file_block, 'user_tasks')
-    let open_tasks = GetLinesFromBlock(todo_file_block, 'open_tasks')
-    let done_tasks = GetLinesFromBlock(todo_file_block, 'done_tasks')
-    let cancelled_tasks = GetLinesFromBlock(todo_file_block, 'cancelled_tasks')
+  if(relevant_block != [])
+    let open_tasks = GetLinesFromBlock(relevant_block, 'open_tasks')
+    let user_tasks = GetLinesFromBlock(relevant_block, 'user_tasks')
+    let done_tasks = GetLinesFromBlock(relevant_block, 'done_tasks')
+    let cancelled_tasks = GetLinesFromBlock(relevant_block, 'cancelled_tasks')
   endif
 
   " Handle creation and marking of tasks
@@ -103,7 +103,7 @@ function CutOrCreateRelevantTodoBlock(relevant_block, current_filename)
       " We do not want to manipulate the todo group header
       let start += 1
       " If there is already an entry, check for existing todos
-      let finish = match(todo_file, 'FILE .*:', start)
+      let finish = match(todo_file, 'FILE .*:\C', start)
       " If there is no file group todo list after ours then its EOF
       if(finish == -1)
         let finish = len(todo_file)
@@ -112,9 +112,9 @@ function CutOrCreateRelevantTodoBlock(relevant_block, current_filename)
       let finish -= 1
 
       " Copy the relevant part
-      let index = 0
+      let index = start
       while index < finish
-        let line = get(todo_file, index+start)
+        let line = get(todo_file, index)
         call add(a:relevant_block, line)
         let index += 1
       endwhile
@@ -151,7 +151,6 @@ function GetLinesFromBlock(file_block, type)
     let mark = '☐ \d*:.*'
   elseif(a:type =~ 'done_tasks')
     let mark = '✔.*'
-    echom 'Looking for done tasks'
   elseif(a:type =~ 'cancelled_tasks')
     let mark = '✘.*'
   else
@@ -168,8 +167,8 @@ function GetLinesFromBlock(file_block, type)
   let index = 0
   while index < finish
     let current_line = get(a:file_block, index)
-    echom current_line
-    if((current_line =~ mark) && (current_line !~ not_mark))
+    " if((current_line =~ mark) && (current_line !~ not_mark))
+    if((current_line =~ mark))
       call add(matching_lines, current_line)
       call remove(a:file_block, index)
       let finish -= 1
@@ -187,31 +186,38 @@ endfunction
 " ----------------------------------------------------------------------------
 function HandleTaskManagement(current_todos, open_tasks, done_tasks)
   echom 'HandleTaskManagement'
-  " First, mark open tasks as done that are not in the buffer anymore
-  let open_finish = 0
+  " Loop through open tasks and loop through buffer for each open tasks item
+  " Decide wether to make update from buffer
+  " Or mark as done
+  let open_finish = len(a:open_tasks)
   let open_index = 0
   while open_index < open_finish
     let match_found = 0
-    let open_line = get(a:open_tasks, index)
+    let open_line = get(a:open_tasks, open_index)
     let open_line_number = matchstr(open_line, '☐ \d*:')
     let open_line_comment_temp = split(open_line, ': ')
     let open_line_comment = open_line_comment_temp[1]
 
-    let finish = len(current_todos)
+    echom 'Looping through buffer with length '.len(a:current_todos)
+
+    let finish = len(a:current_todos)
     let index = 0
     while index < finish
-      let current_todo_line = get(current_todos, index)
+      let current_todo_line = get(a:current_todos, index)
       let current_todo_line_number = matchstr(current_todo_line, '☐ \d*:')
       let current_todo_line_comment_temp = split(current_todo_line, ': ')
       let current_todo_line_comment = current_todo_line_comment_temp[1]
 
       if(current_todo_line_comment =~ open_line_comment)
+        echom 'Match found'
         " Update open tasks and remove from current todo
         call insert(a:open_tasks, current_todo_line, open_index)
         call remove(a:open_tasks, open_index+1)
         call remove(a:current_todos, index)
         let match_found = 1
         break
+      else
+        echom current_todo_line_comment.' does not match '.open_line_comment
       endif
       let index += 1
     endwhile
@@ -225,8 +231,8 @@ function HandleTaskManagement(current_todos, open_tasks, done_tasks)
       " No match in current buffer found, it was most likely removed,
       " so mark as done
       let temp = substitute(a:done_tasks[open_index], '☐', '✔', '')
-      call add(done_tasks, temp." @done (" . strftime("%Y-%m-%d %H:%M") .")")
-      call remove(open_tasks, open_index)
+      call add(a:done_tasks, temp." @done (" . strftime("%Y-%m-%d %H:%M") .")")
+      call remove(a:open_tasks, open_index)
       let open_index -= 1
     else
       open_index += 1
@@ -267,7 +273,7 @@ function WriteTasksToFile(start, user_tasks, open_tasks, done_tasks, cancelled_t
     let index += len(a:open_tasks)
   endif
 
-  " --- If there are done or cancelled tasks, add fold marker
+  " --- Add, find or remove fold start marker if necessary
   if(!empty(a:done_tasks) || !empty(a:cancelled_tasks))
     call insert(todo_file, '{{{', index)
     let index += 1
@@ -285,7 +291,7 @@ function WriteTasksToFile(start, user_tasks, open_tasks, done_tasks, cancelled_t
     let index += len(a:cancelled_tasks)
   endif
 
-  " --- Add fold end marker if necessary
+  " --- Add, find or remove fold end marker if necessary
   if(!empty(a:done_tasks) || !empty(a:cancelled_tasks))
     call insert(todo_file, '}}}', index)
     let index += 1
