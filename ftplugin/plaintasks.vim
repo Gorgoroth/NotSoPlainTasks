@@ -15,6 +15,7 @@ endif
 " New task in project.todo
 nnoremap <Leader>nptn :call NewTask()<cr>A
 " <Leader>nptj " Jump to source code
+nnoremap <Leader>nptj :call JumpToFileAndLine()<cr>
 " Done with task in project.todo
 nnoremap <Leader>nptd :call ToggleComplete()<cr>
 
@@ -24,6 +25,21 @@ nnoremap <buffer> =
 " when pressing enter within a task it creates another task
 " TODO checkout why this doesnt work
 setlocal comments+=n:☐
+
+function! JumpToFileAndLine()
+  let line = getline('.')
+  " Extract filename
+  let filename = ''
+  " TODO extract line number
+  let line_number = matchstr(line, '^\%(☐ \)\d*\%(:\)')
+  echom "Jumping to ".filename.':'.line_number
+  "
+  " TODO check if file exists
+    " TODO if yes check if line number exists in file
+    "   TODO if yes, jump to file and line
+    "   TODO if not, jump to file, display message that line wasn't found
+    " TODO if not, display message that file wasn't found
+endfunction
 
 function! ToggleComplete()
   let line = getline('.')

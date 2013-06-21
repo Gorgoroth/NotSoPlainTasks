@@ -1,3 +1,4 @@
+
 GENERAL:
 This is a general discription and should not be touched by the plugin
 
@@ -26,10 +27,17 @@ FILE plugin/plaintasks.vim:
 }}}
 
 FILE ftplugin/plaintasks.vim:
-☐ 21: think of better keyboard shortcuts
-☐ 25: checkout why this doesnt work
-☐ 35: have an option for the date format
+☐ 22: think of better keyboard shortcuts
+☐ 26: checkout why this doesnt work
+☐ 33: extract line number
+☐ 37: check if file exists
+☐ 38: if yes check if line number exists in file
+☐ 39: if yes, jump to file and line
+☐ 40: if not, jump to file, display message that line wasn't found
+☐ 41: if not, display message that file wasn't found
+☐ 51: have an option for the date format
 {{{
+✔ 29: extract filename @done (2013-06-21 15:41)
 ✔ 13: implement new keyboard shortcuts @done (2013-06-21 15:17)
 ✔ Add new keyboard short cuts @done (2013-06-21 15:14)
 ✔ 42: What is A and I? @done (2013-06-21 15:13)
@@ -43,4 +51,7 @@ FILE ftplugin/plaintasks.vim:
 
 FILE ftdetect/plaintasks.vim:
 ☐ 1: add file header and documentation
+
+FILE README.md:
+☐ 16: explain do_stuff function better
 
