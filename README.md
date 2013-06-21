@@ -17,14 +17,22 @@ Just work as normal, if there's a todo, just do this
 
 then save with :w, your task with be added to project.todo in your working dir. All tasks are grouped by source code filenames. If you remove the comment again and save, the task is toggled as done in the project.todo.
 
+### Globally
+
+Hit
+
+    <Leader>nptg
+
+to generate a project.todo from all files in your working directory
+
 ### In the project.todo
 In your \*.todo-files, you can use the following keys in normal mode:
 
-    + - create new task
-    = - toggle complete
-    <C-M> - toggle cancel
-    - - archive tasks
-    --<space> - insert a separator line
+    <Leader>nptn - new task
+    <Leader>nptj - jump, same as gf below
+    gf           - jump to file and line of task under cursor
+    <Leader>nptd - done with task, currently jumps to file and line of task under cursor
+    <Leader>nptc - clean tasks, removes all done tasks from project.todo
 
 ## Notes
 Source code file is authorative

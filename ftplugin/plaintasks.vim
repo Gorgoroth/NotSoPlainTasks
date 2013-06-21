@@ -10,18 +10,40 @@ if exists("b:did_ftplugin")
   finish
 endif
 
-" TODO think of better keyboard shortcuts
-nnoremap <buffer> + :call NewTask()<cr>A
-nnoremap <buffer> = :call ToggleComplete()<cr>
+" Default keyboard bindings in project.todo
+" <Leader>nptc " clean done and cancelled tasks from project.todo
+" New task in project.todo
+nnoremap <Leader>nptn :call NewTask()<cr>A
+" <Leader>nptj " Jump to source code
+nnoremap gf :call JumpToFileAndLine()<cr>
+nnoremap <Leader>nptj :call JumpToFileAndLine()<cr>
+" Done with task in project.todo
+nnoremap <Leader>nptd :call ToggleComplete()<cr>
 
-" TODO this is also mapped to Enter, why?
-nnoremap <buffer> <C-M> :call ToggleCancel()<cr>
-" TODO separator doesn't work
-abbr -- <c-r>=Separator()<cr>
+function! JumpToFileAndLine()
+  let line = getline('.')
+  let line_number = matchstr(line, '\(☐ \)\@<=\(\d*\)\(.*\)\@<=')
 
-" when pressing enter within a task it creates another task
-" TODO checkout why this doesnt work
-setlocal comments+=n:☐
+  let file_name_regex = '\(^FILE \)\@<=\(.*\)\(:\)\@<='
+  let file_name_number = search(file_name_regex, 'bnW')
+  let file_name_line = getline(file_name_number)
+  let filename = matchstr(file_name_line, file_name_regex)
+  let filename = substitute(filename, ':', '','')
+
+  echom "Jumping to ".filename.':'.line_number
+
+  if(filename != '')
+    exec ':e '.filename
+    if(line_number != '')
+      exec 'normal '.line_number.'G'
+    else
+      exec 'normal gg'
+      echom 'Linenumber not found in file'
+    endif
+  else
+    echom 'File not found'
+  endif
+endfunction
 
 function! ToggleComplete()
   let line = getline('.')
@@ -37,34 +59,11 @@ function! ToggleComplete()
   endif
 endfunc
 
-function! ToggleCancel()
-  let line = getline('.')
-  if line =~ "^ *✘"
-    s/^\( *\)✘/\1☐/
-    s/ *@cancelled.*$//
-  elseif line =~ "^ *☐"
-    s/^\( *\)☐/\1✘/
-    let text = " @cancelled (" . strftime("%Y-%m-%d %H:%M") .")"
-    exec "normal A" . text
-    normal _
-  endif
-endfunc
-
-" TODO What is A and I?
 function! NewTask()
   let line=getline('.')
   if line =~ "^ *$"
     normal A☐
   else
-    normal I☐
+    normal o☐
   end
-endfunc
-
-function! Separator()
-    let line = getline('.')
-    if line =~ "^-*$"
-      return "--- ✄ -----------------------"
-    else
-      return "--"
-    end
 endfunc
