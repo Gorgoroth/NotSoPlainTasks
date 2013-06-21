@@ -11,14 +11,26 @@ if exists("b:did_ftplugin")
 endif
 
 " Default keyboard bindings in project.todo
-" <Leader>nptc " clean done and cancelled tasks from project.todo
+" clean done and cancelled tasks from project.todo
+nnoremap <Leader>nptc :call CleanTasks()<cr>
 " New task in project.todo
 nnoremap <Leader>nptn :call NewTask()<cr>A
-" <Leader>nptj " Jump to source code
+" Jump to source code
 nnoremap gf :call JumpToFileAndLine()<cr>
 nnoremap <Leader>nptj :call JumpToFileAndLine()<cr>
 " Done with task in project.todo
 nnoremap <Leader>nptd :call ToggleComplete()<cr>
+
+function! CleanTasks()
+  call inputsave()
+  let go_ahead = input('Are you sure you want to delete all your completed tasks? (yes/no)')
+  call inputrestore()
+  if(go_ahead =~ 'yes')
+    exec 'g/✔.*/d'
+    exec 'g/{{{/d'
+    exec 'g/}}}/d'
+  endif
+endfunction
 
 function! JumpToFileAndLine()
   let line = getline('.')
