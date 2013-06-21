@@ -4,7 +4,8 @@ This is a general discription and should not be touched by the plugin
 FILE plugin/plaintasks.vim:
 ☐ Refactor file into smaller functions
 ☐ Refactor file to make clear, when and where variables are changed
-☐ 185: see, if we can make the filter smarter
+☐ 12: global keybindings
+☐ 188: see, if we can make the filter smarter
 {{{
 ✔ 1: have file comment header @done (2013-06-21 14:29)
 ✔ 61: we can see if this works @done (2013-06-21 14:19)
@@ -25,13 +26,15 @@ FILE plugin/plaintasks.vim:
 }}}
 
 FILE ftplugin/plaintasks.vim:
-☐ 13: think of better keyboard shortcuts
-☐ 17: this is also mapped to Enter, why?
-☐ 19: separator doesn't work
-☐ 23: checkout why this doesnt work
-☐ 33: have an option for the date format
-☐ 53: What is A and I?
+☐ 21: think of better keyboard shortcuts
+☐ 25: checkout why this doesnt work
+☐ 35: have an option for the date format
 {{{
+✔ 13: implement new keyboard shortcuts @done (2013-06-21 15:17)
+✔ Add new keyboard short cuts @done (2013-06-21 15:14)
+✔ 42: What is A and I? @done (2013-06-21 15:13)
+✔ 25: this is also mapped to Enter, why? @done (2013-06-21 14:58)
+✔ 19: separator doesn't work @done (2013-06-21 14:56)
 ✔ 20: archiving tasks doesn't work @done (2013-06-21 14:35)
 ✔ 8: toggle me @done (2013-06-21 14:33)
 ✔ 6: but keep the credits @done (2013-06-21 14:33)

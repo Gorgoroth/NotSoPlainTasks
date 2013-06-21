@@ -9,6 +9,9 @@ augroup NotSoPlainTasks
   autocmd FileType plaintasks setlocal foldclose=all
 augroup END
 
+" TODO global keybindings
+" <Leader>nptg " generate project.todo for working dir
+
 " ----------------------------------------------------------------------------
 " --- This is our main loop that ties the plugin together
 " ----------------------------------------------------------------------------

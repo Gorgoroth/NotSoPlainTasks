@@ -10,14 +10,16 @@ if exists("b:did_ftplugin")
   finish
 endif
 
-" TODO think of better keyboard shortcuts
-nnoremap <buffer> + :call NewTask()<cr>A
-nnoremap <buffer> = :call ToggleComplete()<cr>
+" Default keyboard bindings in project.todo
+" <Leader>nptc " clean done and cancelled tasks from project.todo
+" New task in project.todo
+nnoremap <Leader>nptn :call NewTask()<cr>A
+" <Leader>nptj " Jump to source code
+" Done with task in project.todo
+nnoremap <Leader>nptd :call ToggleComplete()<cr>
 
-" TODO this is also mapped to Enter, why?
-nnoremap <buffer> <C-M> :call ToggleCancel()<cr>
-" TODO separator doesn't work
-abbr -- <c-r>=Separator()<cr>
+" TODO think of better keyboard shortcuts
+nnoremap <buffer> =
 
 " when pressing enter within a task it creates another task
 " TODO checkout why this doesnt work
@@ -37,34 +39,11 @@ function! ToggleComplete()
   endif
 endfunc
 
-function! ToggleCancel()
-  let line = getline('.')
-  if line =~ "^ *✘"
-    s/^\( *\)✘/\1☐/
-    s/ *@cancelled.*$//
-  elseif line =~ "^ *☐"
-    s/^\( *\)☐/\1✘/
-    let text = " @cancelled (" . strftime("%Y-%m-%d %H:%M") .")"
-    exec "normal A" . text
-    normal _
-  endif
-endfunc
-
-" TODO What is A and I?
 function! NewTask()
   let line=getline('.')
   if line =~ "^ *$"
     normal A☐
   else
-    normal I☐
+    normal o☐
   end
-endfunc
-
-function! Separator()
-    let line = getline('.')
-    if line =~ "^-*$"
-      return "--- ✄ -----------------------"
-    else
-      return "--"
-    end
 endfunc
