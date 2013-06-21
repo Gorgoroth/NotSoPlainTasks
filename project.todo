@@ -7,10 +7,12 @@ FILE plugin/plaintasks.vim:
 ☐ Refactor file into smaller functions
 ☐ Refactor file to make clear, when and where variables are changed
 ☐ 1: have file comment header
-☐ 40: creating a few
-☐ 41: test comments
-☐ 55: within code so
-☐ 62: we can see if this works
+☐ 182: see, if we can make the filter smarter
+{{{
+✔ 61: we can see if this works @done (2013-06-21 14:19)
+✔ 54: within code so @done (2013-06-21 14:19)
+✔ 40: test comments @done (2013-06-21 14:19)
+✔ 40: creating a few @done (2013-06-21 14:19)
 ✔ 29: clean file todo group between header and new line @done (2013-06-20 19:50)
 ✔ 30: Add user tasks after file group todo header @done (2013-06-20 19:50)
 ✔ 31: Add open tasks in order of appearance in source code @done (2013-06-20 19:50)
@@ -22,6 +24,7 @@ FILE plugin/plaintasks.vim:
 ✔ 228: skip this test if we found no todos @done (2013-06-20 15:08)
 ✔ 138: lets see if we can solve this better @done (2013-06-20 15:02)
 ✔ 146: this is also @done (2013-06-20 15:02)
+}}}
 
 FILE ftplugin/plaintasks.vim:
 ☐ 5: update file header

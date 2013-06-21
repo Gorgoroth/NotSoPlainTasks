@@ -10,7 +10,6 @@ augroup END
 " --- This is our main loop that ties the plugin together
 " ----------------------------------------------------------------------------
 function NotSoPlainTasksHandleBuffer()
-  echom 'NotSoPlainTasksHandleBuffer'
   let relevant_block = []
   let user_tasks = []
   let open_tasks = []
@@ -37,14 +36,10 @@ function NotSoPlainTasksHandleBuffer()
   call WriteTasksToFile(start, user_tasks, open_tasks, done_tasks, cancelled_tasks)
 endfunction
 
-" TODO creating a few
-" TODO test comments
-
 " ----------------------------------------------------------------------------
 " --- Searches buffer for todos and returns a list of them
 " ----------------------------------------------------------------------------
 function GetCurrentTodosFromBuffer()
-  echom 'GetCurrentTodosFromBuffer'
   let lines = []
 
   " Skip files in our blacklist
@@ -52,14 +47,11 @@ function GetCurrentTodosFromBuffer()
     let i = 0
     while i <= line('$')
       let line = getline(i)
-      " TODO within code so
-
       " We want to use this plugin for this file, so we need to skip the
       " regexes a few lines below this
       if(line =~# 'TODO \.\*')
         let i += 1
         continue
-        " TODO we can see if this works
       endif
       " Try to weed out unwanted triggers, keyword must follow comment
       " characters immediately
@@ -82,7 +74,6 @@ endfunction
 " --- Also, cut out really means delete
 " ----------------------------------------------------------------------------
 function CutOrCreateRelevantTodoBlock(relevant_block, current_filename)
-  echom 'CutOrCreateRelevantTodoBlock'
   let header = 'FILE '.a:current_filename.':'
   let footer = ''
   let found_something = 0
@@ -139,7 +130,6 @@ endfunction
 " --- Searches project file and returns a list of matching lines
 " ----------------------------------------------------------------------------
 function GetLinesFromBlock(file_block, type)
-  echom 'GetLinesFromBlock'
   let matching_lines = []
   let mark = ''
   let not_mark = ''
@@ -185,68 +175,37 @@ endfunction
 " --- the open or done tasks
 " ----------------------------------------------------------------------------
 function HandleTaskManagement(current_todos, open_tasks, done_tasks)
-  echom 'HandleTaskManagement'
-  " Loop through open tasks and loop through buffer for each open tasks item
-  " Decide wether to make update from buffer
-  " Or mark as done
-  let open_finish = len(a:open_tasks)
-  let open_index = 0
-  while open_index < open_finish
-    let match_found = 0
-    let open_line = get(a:open_tasks, open_index)
-    let open_line_number = matchstr(open_line, '☐ \d*:')
-    let open_line_comment_temp = split(open_line, ': ')
-    let open_line_comment = open_line_comment_temp[1]
-
-    echom 'Looping through buffer with length '.len(a:current_todos)
-
-    let finish = len(a:current_todos)
-    let index = 0
-    while index < finish
-      let current_todo_line = get(a:current_todos, index)
-      let current_todo_line_number = matchstr(current_todo_line, '☐ \d*:')
-      let current_todo_line_comment_temp = split(current_todo_line, ': ')
-      let current_todo_line_comment = current_todo_line_comment_temp[1]
-
-      if(current_todo_line_comment =~ open_line_comment)
-        echom 'Match found'
-        " Update open tasks and remove from current todo
-        call insert(a:open_tasks, current_todo_line, open_index)
-        call remove(a:open_tasks, open_index+1)
-        call remove(a:current_todos, index)
-        let match_found = 1
-        break
-      else
-        echom current_todo_line_comment.' does not match '.open_line_comment
-      endif
-      let index += 1
-    endwhile
-
-  " Because we manipulate the array we iterate over this is a bit tricky.
-  " If we change an item we increment the line_index
-  " If we delete a line, we keep the line index but decrement the upper bound
-  " That is because we stay in the same line and the next ones move up if we
-  " delete a list item
-    if(match_found != 1)
-      " No match in current buffer found, it was most likely removed,
-      " so mark as done
-      let temp = substitute(a:done_tasks[open_index], '☐', '✔', '')
-      call add(a:done_tasks, temp." @done (" . strftime("%Y-%m-%d %H:%M") .")")
-      call remove(a:open_tasks, open_index)
-      let open_index -= 1
-    else
-      open_index += 1
-    endif
+  " Delete all open_tasks that have matches in current buffer
+  " Buffer is more recent and therefore more relevant
+  let i = 0
+  while i < len(a:current_todos)
+    " TODO see, if we can make the filter smarter
+    let line = a:current_todos[i]
+    let tmp = split(line, ': ')
+    let line = tmp[1]
+    call filter(a:open_tasks, 'v:val !~ "'.line.'"')
+    let i += 1
   endwhile
 
-  " Second, add each from buffer todos that has not been touched
-  " All that are now still in the buffer have no matches and are therefore new
-  let finish = len(a:current_todos)
-  let index = 0
-  while index < finish
-    call add(a:open_tasks, a:current_todos[index])
-    call remove(a:current_todos, index)
-    let finish -= 1
+  " Mark all open_tasks as done, that are not in buffer
+  " All tasks that are still open are now in current_todos
+  " all left in open_tasks are done
+  let done = len(a:open_tasks)
+  let i = 0
+  while i < done
+    " That means add to done_tasks
+    let temp = substitute(a:open_tasks[i], '☐', '✔', '')
+    call insert(a:done_tasks, temp." @done (" . strftime("%Y-%m-%d %H:%M") .")", 0)
+    " Remove from open_tasks
+    call remove(a:open_tasks, i)
+    let done -= 1
+  endwhile
+
+  " Add all tasks from buffer to open tasks
+  let i = 0
+  while i < len(a:current_todos)
+    call add(a:open_tasks, a:current_todos[i])
+    let i += 1
   endwhile
 endfunction
 
@@ -256,7 +215,6 @@ endfunction
 " --- one line after file todo group header
 " ----------------------------------------------------------------------------
 function WriteTasksToFile(start, user_tasks, open_tasks, done_tasks, cancelled_tasks)
-  echom 'WriteTasksToFile'
   let todo_filename = getcwd().'/project.todo'
   let todo_file = readfile(todo_filename)
   let index = a:start
