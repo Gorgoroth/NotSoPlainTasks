@@ -15,30 +15,34 @@ endif
 " New task in project.todo
 nnoremap <Leader>nptn :call NewTask()<cr>A
 " <Leader>nptj " Jump to source code
+nnoremap gf :call JumpToFileAndLine()<cr>
 nnoremap <Leader>nptj :call JumpToFileAndLine()<cr>
 " Done with task in project.todo
 nnoremap <Leader>nptd :call ToggleComplete()<cr>
 
-" TODO think of better keyboard shortcuts
-nnoremap <buffer> =
-
-" when pressing enter within a task it creates another task
-" TODO checkout why this doesnt work
-setlocal comments+=n:☐
-
 function! JumpToFileAndLine()
   let line = getline('.')
-  " Extract filename
-  let filename = ''
-  " TODO extract line number
-  let line_number = matchstr(line, '^\%(☐ \)\d*\%(:\)')
+  let line_number = matchstr(line, '\(☐ \)\@<=\(\d*\)\(.*\)\@<=')
+
+  let file_name_regex = '\(^FILE \)\@<=\(.*\)\(:\)\@<='
+  let file_name_number = search(file_name_regex, 'bnW')
+  let file_name_line = getline(file_name_number)
+  let filename = matchstr(file_name_line, file_name_regex)
+  let filename = substitute(filename, ':', '','')
+
   echom "Jumping to ".filename.':'.line_number
-  "
-  " TODO check if file exists
-    " TODO if yes check if line number exists in file
-    "   TODO if yes, jump to file and line
-    "   TODO if not, jump to file, display message that line wasn't found
-    " TODO if not, display message that file wasn't found
+
+  if(filename != '')
+    exec ':e '.filename
+    if(line_number != '')
+      exec 'normal '.line_number.'G'
+    else
+      exec 'normal gg'
+      echom 'Linenumber not found in file'
+    endif
+  else
+    echom 'File not found'
+  endif
 endfunction
 
 function! ToggleComplete()
