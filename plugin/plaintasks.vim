@@ -4,29 +4,45 @@
 " License: Same as Vim itself, see :help license
 
 augroup NotSoPlainTasks
-  autocmd BufWritePost * call NotSoPlainTasksHandleBuffer()
+  autocmd BufWritePost * call HandleSaveFile()
   autocmd FileType plaintasks setlocal foldmethod=marker
   autocmd FileType plaintasks setlocal foldclose=all
 augroup END
 
-" TODO global keybindings
-" <Leader>nptg " generate project.todo for working dir
+" generate project.todo for working dir
+nnoremap <Leader>nptg GenerateWorkingDirTodos()<cr>
+
+function! GenerateWorkingDirTodos()
+  let working_dir = getcwd()
+  " TOOD iterate of each file, if not on blacklist
+    let file_name = working_dir.current_file
+    let file = readfile(file_name)
+    call NotSoPlainTasksHandleFile(file_name, file)
+endfunction
+
+function! HandleSaveFile()
+  let file_name = bufname('%')
+  let file = getline(0, line('$'))
+  call NotSoPlainTasks(file_name, file)
+endfunction
 
 " ----------------------------------------------------------------------------
 " --- This is our main loop that ties the plugin together
+" --- Expects full file name with relative path from working dir
+" --- Expects list with file contents
 " ----------------------------------------------------------------------------
-function NotSoPlainTasksHandleBuffer()
+function NotSoPlainTasks(file_name, file)
   let relevant_block = []
   let user_tasks = []
   let open_tasks = []
   let done_tasks = []
   let cancelled_tasks = []
 
-  let current_todos = GetCurrentTodosFromBuffer()
+  let current_todos = GetCurrentTodos(a:file)
   if(current_todos == [])
     return
   endif
-  let start = CutOrCreateRelevantTodoBlock(relevant_block, bufname('%'))
+  let start = CutOrCreateRelevantTodoBlock(relevant_block, a:file_name)
 
   if(relevant_block != [])
     let open_tasks = GetLinesFromBlock(relevant_block, 'open_tasks')
@@ -45,31 +61,29 @@ endfunction
 " ----------------------------------------------------------------------------
 " --- Searches buffer for todos and returns a list of them
 " ----------------------------------------------------------------------------
-function GetCurrentTodosFromBuffer()
+function GetCurrentTodos(file)
   let lines = []
 
-  " Skip files in our blacklist
-  if(bufname('%') !~ '.*\.todo')
-    let i = 0
-    while i <= line('$')
-      let line = getline(i)
-      " We want to use this plugin for this file, so we need to skip the
-      " regexes a few lines below this
-      if(line =~# 'TODO \.\*')
-        let i += 1
-        continue
-      endif
-      " Try to weed out unwanted triggers, keyword must follow comment
-      " characters immediately
-      if( (line =~# '" TODO .*') || (line =~# '// TODO .*') || (line =~# '# TODO .*') || (line =~# '/* TODO .*') )
-        let exact_match = split(line, 'TODO ')[1]
-        " Assemble new task
-        let templine = '☐ '.i.': '.exact_match
-        call add(lines, templine)
-      endif
+  let i = 0
+  while i <= len(a:file)
+    let line = get(a:file, i)
+    " We want to use this plugin for this file, so we need to skip the
+    " regexes a few lines below this
+    if(line =~# 'TODO \.\*')
       let i += 1
-    endw
-  endif
+      continue
+    endif
+    " Try to weed out unwanted triggers, keyword must follow comment
+    " characters immediately
+    if( (line =~# '" TODO .*') || (line =~# '// TODO .*') || (line =~# '# TODO .*') || (line =~# '/* TODO .*') )
+      let exact_match = split(line, 'TODO ')[1]
+      " Assemble new task
+      let templine = '☐ '.i.': '.exact_match
+      call add(lines, templine)
+    endif
+    let i += 1
+  endw
+
   return lines
 endfunction
 

@@ -2,13 +2,15 @@ GENERAL:
 This is a general discription and should not be touched by the plugin
 ☐ Add README.md to black list
 ☐ Let user specify options, i.e. personal black list, date format etc.
+☐ Rename project, e.g. SourceTodoManager
 
 FILE plugin/plaintasks.vim:
 ☐ Refactor file into smaller functions
 ☐ Refactor file to make clear, when and where variables are changed
-☐ 12: global keybindings
-☐ 188: see, if we can make the filter smarter
+☐ 202: see, if we can make the filter smarter
 {{{
+✔ 16: get working dir @done (2013-06-22 17:25)
+✔ 12: global keybindings @done (2013-06-22 17:04)
 ✔ 1: have file comment header @done (2013-06-21 14:29)
 ✔ 61: we can see if this works @done (2013-06-21 14:19)
 ✔ 54: within code so @done (2013-06-21 14:19)
