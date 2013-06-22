@@ -1,5 +1,7 @@
 GENERAL:
 This is a general discription and should not be touched by the plugin
+☐ Add README.md to black list
+☐ Let user specify options, i.e. personal black list, date format etc.
 
 FILE plugin/plaintasks.vim:
 ☐ Refactor file into smaller functions
@@ -52,5 +54,7 @@ FILE ftdetect/plaintasks.vim:
 ☐ 1: add file header and documentation
 
 FILE README.md:
-☐ 16: explain do_stuff function better
+☐ 7: is automatically recognized as a task. When you save your work, all tasks are automatically compiled into a project.todo in your working dir root. All tasks are grouped by the source code file name.
+☐ 9: code comment and save your work, that task is automatically marked as done and put into a fold in the file group.
+☐ 26: explain do_stuff function better
 
